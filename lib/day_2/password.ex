@@ -1,5 +1,6 @@
 defmodule Password do
   @line_regex ~r/(?<low>\d+)-(?<high>\d+) (?<letter>\w+): (?<password>\w+)/
+  @list_of_lines_from_txt FileImport.list_of_lines("lib/day_2/data.txt")
 
   @doc """
   Your flight departs in a few days from the coastal airport; the easiest way
@@ -36,8 +37,8 @@ defmodule Password do
 
   Your puzzle answer was 524.
   """
-  def part_1() do
-    solution(validate_part1())
+  def part_1(list_of_lines \\ @list_of_lines_from_txt) do
+    solution(validate_part1(), list_of_lines)
   end
 
   @doc """
@@ -63,23 +64,16 @@ defmodule Password do
 
   Your puzzle answer was 485.
   """
-  def part_2() do
-    solution(validate_part2())
+  def part_2(list_of_lines \\ @list_of_lines_from_txt) do
+    solution(validate_part2(), list_of_lines)
   end
 
-  def solution(validate_func) do
-    list_of_lines()
+  def solution(validate_func, list_of_lines) do
+    list_of_lines
     |> Enum.map(&Regex.named_captures(@line_regex, &1))
     |> Enum.map(&make_numbers_integers/1)
     |> Enum.map(validate_func)
     |> Enum.count(& &1)
-  end
-
-  def list_of_lines do
-    "lib/day_2/data.txt"
-    |> File.read!()
-    |> String.trim_trailing()
-    |> String.split("\n")
   end
 
   def make_numbers_integers(%{

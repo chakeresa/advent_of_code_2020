@@ -40,19 +40,18 @@ defmodule SumTwo2020 do
   Your puzzle answer was 605364.
   """
 
+  @list_of_lines_from_txt FileImport.list_of_lines("lib/day_1/data.txt")
+
   def target, do: 2020
 
-  def solution do
-    sorted_list()
+  def solution(list_of_lines \\ @list_of_lines_from_txt) do
+    sorted_list(list_of_lines)
     |> pare_down_list(target())
     |> multiply()
   end
 
-  def sorted_list do
-    "lib/day_1/data.txt"
-    |> File.read!()
-    |> String.trim_trailing()
-    |> String.split("\n")
+  def sorted_list(list_of_lines) do
+    list_of_lines
     |> Enum.map(&String.to_integer(&1))
     |> Enum.sort()
   end
