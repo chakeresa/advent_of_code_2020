@@ -1,6 +1,6 @@
-# AdventOfCode
+# Advent of Code 2020
 
-**TODO: Add description**
+https://adventofcode.com/2020
 
 ## Installation
 
@@ -18,4 +18,3 @@ end
 Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
 and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
 be found at [https://hexdocs.pm/advent_of_code_2020](https://hexdocs.pm/advent_of_code_2020).
-
