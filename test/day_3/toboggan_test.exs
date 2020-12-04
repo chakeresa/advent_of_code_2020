@@ -12,27 +12,43 @@ defmodule TobogganTest do
     test "passes in the pattern with other params at starting point" do
       starting_coord = %Coordinate{}
 
-      assert Toboggan.new(@pattern) == %Toboggan{
+      assert Toboggan.new(@pattern, 5) == %Toboggan{
                pattern: @pattern,
                current_coord: starting_coord,
-               hits: 0
+               hits: 0,
+               slope: 5
              }
     end
   end
 
   describe "next_coord" do
     test "returns the next coordinate (within input pattern)" do
-      initial = %{Toboggan.new(@pattern) | current_coord: %Coordinate{x: 1, y: 1}, slope: 3}
+      initial = %Toboggan{
+        pattern: @pattern,
+        current_coord: %Coordinate{x: 1, y: 1},
+        slope: 3
+      }
+
       assert %Coordinate{x: 4, y: 2} = Toboggan.next_coord(initial)
     end
 
     test "returns the next coordinate (outside the input pattern to the right)" do
-      initial = %{Toboggan.new(@pattern) | current_coord: %Coordinate{x: 1, y: 1}, slope: 5}
+      initial = %Toboggan{
+        pattern: @pattern,
+        current_coord: %Coordinate{x: 1, y: 1},
+        slope: 5
+      }
+
       assert %Coordinate{x: 1, y: 2} = Toboggan.next_coord(initial)
     end
 
     test "returns nil if already on the last row" do
-      initial = %{Toboggan.new(@pattern) | current_coord: %Coordinate{x: 1, y: 3}, slope: 5}
+      initial = %Toboggan{
+        pattern: @pattern,
+        current_coord: %Coordinate{x: 1, y: 3},
+        slope: 5
+      }
+
       assert is_nil(Toboggan.next_coord(initial))
     end
   end
@@ -63,23 +79,26 @@ defmodule TobogganTest do
 
   describe "part 1" do
     test "works for the example data" do
-      assert Toboggan.hits_at_slope_3([
-               "..##.......",
-               "#...#...#..",
-               ".#....#..#.",
-               "..#.#...#.#",
-               ".#...##..#.",
-               "..#.##.....",
-               ".#.#.#....#",
-               ".#........#",
-               "#.##...#...",
-               "#...##....#",
-               ".#..#...#.#"
-             ]) == 7
+      assert Toboggan.hits_at_slope(
+               [
+                 "..##.......",
+                 "#...#...#..",
+                 ".#....#..#.",
+                 "..#.#...#.#",
+                 ".#...##..#.",
+                 "..#.##.....",
+                 ".#.#.#....#",
+                 ".#........#",
+                 "#.##...#...",
+                 "#...##....#",
+                 ".#..#...#.#"
+               ],
+               3
+             ) == 7
     end
 
     test "works for the real data" do
-      assert Toboggan.hits_at_slope_3() == 195
+      assert Toboggan.hits_at_slope(3) == 195
     end
   end
 end

@@ -71,10 +71,10 @@ defmodule Toboggan do
 
   defstruct [:pattern, current_coord: %Coordinate{}, hits: 0, slope: 3]
 
-  def hits_at_slope_3(list_of_lines \\ @list_of_lines_from_txt) do
+  def hits_at_slope(list_of_lines \\ @list_of_lines_from_txt, slope) do
     list_of_lines
     |> Pattern.new()
-    |> Toboggan.new()
+    |> Toboggan.new(slope)
     |> ride()
     |> Map.get(:hits)
   end
@@ -89,8 +89,8 @@ defmodule Toboggan do
     |> ride()
   end
 
-  def new(%Pattern{} = pattern) do
-    %__MODULE__{pattern: pattern}
+  def new(%Pattern{} = pattern, slope) when is_integer(slope) do
+    %__MODULE__{pattern: pattern, slope: slope}
   end
 
   def next_coord(%__MODULE{
