@@ -1,5 +1,8 @@
 defmodule Passport do
-  @moduledoc """
+  @list_of_lines_from_txt FileImport.list_of_lines("lib/day_4/data.txt")
+  @entry_splitter "{next}"
+
+  @doc """
   You arrive at the airport only to realize that you grabbed your North Pole
   Credentials instead of your passport. While these documents are extremely
   similar, North Pole Credentials aren't issued by a country and therefore
@@ -62,19 +65,17 @@ defmodule Passport do
 
   Count the number of valid passports - those that have all required fields.
   Treat cid as optional. In your batch file, how many passports are valid?
+
+  Your puzzle answer was 250.
   """
-
-  @list_of_lines_from_txt FileImport.list_of_lines("lib/day_4/data.txt")
-  @entry_splitter "{next}"
-
-  def valid_count(list_of_lines \\ @list_of_lines_from_txt) when is_list(list_of_lines) do
+  def lenient_valid_count(list_of_lines \\ @list_of_lines_from_txt) when is_list(list_of_lines) do
     list_of_lines
     |> Enum.join("\n")
     |> String.replace("\n\n", @entry_splitter)
     |> String.replace("\n", " ")
     |> String.split(@entry_splitter)
     |> Enum.map(&map_from_string/1)
-    |> Enum.count(&valid?/1)
+    |> Enum.count(&all_reqd_fields?/1)
   end
 
   def map_from_string(str) when is_binary(str) do
@@ -86,8 +87,16 @@ defmodule Passport do
     end)
   end
 
-  def valid?(%{"byr" => _, "iyr" => _, "eyr" => _, "hgt" => _, "hcl" => _, "ecl" => _, "pid" => _}),
+  def all_reqd_fields?(%{
+        "byr" => _,
+        "iyr" => _,
+        "eyr" => _,
+        "hgt" => _,
+        "hcl" => _,
+        "ecl" => _,
+        "pid" => _
+      }),
       do: true
 
-  def valid?(_), do: false
+  def all_reqd_fields?(_), do: false
 end

@@ -1,7 +1,7 @@
 defmodule PassportTest do
   use ExUnit.Case
 
-  describe "part 1: valid_count returns the count of valid passwords" do
+  describe "part 1: lenient_valid_count returns the count of valid passwords" do
     test "works for the sample data" do
       input = [
         "ecl:gry pid:860033327 eyr:2020 hcl:#fffffd",
@@ -19,17 +19,17 @@ defmodule PassportTest do
         "iyr:2011 ecl:brn hgt:59in"
       ]
 
-      assert Passport.valid_count(input) == 2
+      assert Passport.lenient_valid_count(input) == 2
     end
 
     test "works for the real data" do
-      assert Passport.valid_count() == 250
+      assert Passport.lenient_valid_count() == 250
     end
   end
 
-  describe "valid?" do
+  describe "all_reqd_fields?" do
     test "return boolean" do
-      assert Passport.valid?(%{
+      assert Passport.all_reqd_fields?(%{
                "ecl" => "gry",
                "pid" => "860033327",
                "eyr" => "2020",
@@ -41,7 +41,7 @@ defmodule PassportTest do
              })
 
       # missing hgt
-      refute Passport.valid?(%{
+      refute Passport.all_reqd_fields?(%{
                "iyr" => "2013",
                "ecl" => "amb",
                "cid" => "350",
@@ -51,7 +51,7 @@ defmodule PassportTest do
                "byr" => "1929"
              })
 
-      assert Passport.valid?(%{
+      assert Passport.all_reqd_fields?(%{
                "hcl" => "#ae17e1",
                "iyr" => "2013",
                "eyr" => "2024",
@@ -62,7 +62,7 @@ defmodule PassportTest do
              })
 
       # missing cid & byr
-      refute Passport.valid?(%{
+      refute Passport.all_reqd_fields?(%{
                "hcl" => "#cfa07d",
                "eyr" => "2025",
                "pid" => "166559648",
