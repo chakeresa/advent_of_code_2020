@@ -48,15 +48,13 @@ defmodule RecursionTest do
       assert Recursion.part_2(input) == 60
     end
 
-    # skipping because slow
-    @tag :skip
     test "works for the real data" do
       assert Recursion.part_2() == 1060
     end
   end
 
-  describe "build_tower" do
-    test "constructs a tree of all data" do
+  describe "create_disc" do
+    test "constructs a tree of all data down from the named disc" do
       input = [
         "pbga (66)",
         "xhth (57)",
@@ -73,7 +71,9 @@ defmodule RecursionTest do
         "cntj (57)"
       ]
 
-      assert Recursion.build_tower(input) == %Disc{
+      assert input
+             |> Recursion.parse_lines_to_map()
+             |> Recursion.create_disc("tknk") == %Disc{
                name: "tknk",
                weight: 41,
                children: [

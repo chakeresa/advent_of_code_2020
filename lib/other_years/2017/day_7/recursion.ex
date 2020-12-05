@@ -88,10 +88,34 @@ defmodule Recursion do
 
   def part_2(list_of_lines \\ @list_of_lines_from_txt) do
     list_of_lines
-    |> build_tower()
+    |> parse_lines_to_map()
+    |> create_disc(base_name(list_of_lines))
     |> find_unbalanced_disc()
     |> get_totals()
     |> diff_to_balance()
+  end
+
+  def parse_lines_to_map(list_of_lines) do
+    list_of_lines
+    |> Enum.map(fn line ->
+      captures =
+        Regex.named_captures(
+          ~r/(?<name>\w+) \((?<weight_str>\d+)\)( -> )?(?<children_str>.*)?/,
+          line
+        )
+
+      name = Map.get(captures, "name")
+
+      weight =
+        captures
+        |> Map.get("weight_str")
+        |> String.to_integer()
+
+      children_str = Map.get(captures, "children_str")
+
+      {name, %{weight: weight, children_str: children_str}}
+    end)
+    |> Enum.into(%{})
   end
 
   def get_totals(%Disc{children: children}) do
@@ -131,30 +155,21 @@ defmodule Recursion do
     end
   end
 
-  def build_tower(list_of_lines) do
-    list_of_lines
-    |> base_name()
-    |> create_disc(list_of_lines)
-  end
+  def create_disc(map_of_lines, name) do
+    %{weight: weight, children_str: children_str} = Map.get(map_of_lines, name)
 
-  def create_disc(name, list_of_lines) do
-    line =
-      Enum.find(list_of_lines, fn ln ->
-        name == first_word(ln)
-      end)
+    case children_str do
+      "" ->
+        %Disc{name: name, weight: weight}
 
-    case Regex.named_captures(~r/^\w+ \((?<weight>.+)\) -> (?<child_str>.+)$/, line) do
-      %{"child_str" => child_str, "weight" => weight_str} ->
+      str ->
         children =
-          child_str
+          str
           |> String.split(", ")
-          |> Enum.map(&create_disc(&1, list_of_lines))
+          |> Enum.map(&create_disc(map_of_lines, &1))
 
-        %Disc{name: name, weight: String.to_integer(weight_str), children: children}
-
-      _ ->
-        %{"weight" => weight_str} = Regex.named_captures(~r/^\w+ \((?<weight>.+)\)$/, line)
-        %Disc{name: name, weight: String.to_integer(weight_str)}
+        %Disc{name: name, weight: weight, children: children}
     end
+
   end
 end
