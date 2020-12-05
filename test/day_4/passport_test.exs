@@ -28,7 +28,6 @@ defmodule PassportTest do
   end
 
   describe "part 2: strict_valid_count returns the count of valid passwords" do
-    @tag :skip
     test "works for the sample data" do
       input1 = [
         "eyr:1972 cid:100",
@@ -66,9 +65,8 @@ defmodule PassportTest do
       assert Passport.strict_valid_count(input2) == 4
     end
 
-    @tag :skip
     test "works for the real data" do
-      assert Passport.strict_valid_count() == 42
+      assert Passport.strict_valid_count() == 158
     end
   end
 
@@ -128,111 +126,115 @@ defmodule PassportTest do
       refute Passport.valid_byr?(%{"byr" => "1900"})
       refute Passport.valid_byr?(%{"byr" => "2050"})
       refute Passport.valid_byr?(%{"byr" => "1"})
+      refute Passport.valid_byr?(%{"byr" => "1.0"})
       refute Passport.valid_byr?(%{"byr" => "foo"})
       refute Passport.valid_byr?(%{})
     end
   end
 
   describe "valid_iyr?" do
-    @tag :skip
-    test "returns boolean if TODO" do
-      # four digits; at least 2010 and at most 2020
-      assert Passport.valid_iyr?(%{"iyr" => "1920"})
-      assert Passport.valid_iyr?(%{"iyr" => "1979"})
-      assert Passport.valid_iyr?(%{"iyr" => "2002"})
+    test "returns boolean if at least 2010 and at most 2020" do
+      assert Passport.valid_iyr?(%{"iyr" => "2010"})
+      assert Passport.valid_iyr?(%{"iyr" => "2012"})
+      assert Passport.valid_iyr?(%{"iyr" => "2020"})
 
       refute Passport.valid_iyr?(%{"iyr" => "1900"})
       refute Passport.valid_iyr?(%{"iyr" => "2050"})
       refute Passport.valid_iyr?(%{"iyr" => "1"})
+      refute Passport.valid_iyr?(%{"iyr" => "1.0"})
       refute Passport.valid_iyr?(%{"iyr" => "foo"})
       refute Passport.valid_iyr?(%{})
     end
   end
 
   describe "valid_eyr?" do
-    @tag :skip
-    test "returns boolean if TODO" do
-      # four digits; at least 2020 and at most 2030
-      assert Passport.valid_eyr?(%{"eyr" => "1920"})
-      assert Passport.valid_eyr?(%{"eyr" => "1979"})
-      assert Passport.valid_eyr?(%{"eyr" => "2002"})
+    test "returns boolean if at least 2020 and at most 2030" do
+      assert Passport.valid_eyr?(%{"eyr" => "2020"})
+      assert Passport.valid_eyr?(%{"eyr" => "2025"})
+      assert Passport.valid_eyr?(%{"eyr" => "2030"})
 
       refute Passport.valid_eyr?(%{"eyr" => "1900"})
       refute Passport.valid_eyr?(%{"eyr" => "2050"})
       refute Passport.valid_eyr?(%{"eyr" => "1"})
+      refute Passport.valid_eyr?(%{"eyr" => "1.0"})
       refute Passport.valid_eyr?(%{"eyr" => "foo"})
       refute Passport.valid_eyr?(%{})
     end
   end
 
   describe "valid_hgt?" do
-    @tag :skip
-    test "returns boolean if TODO" do
+    test "returns boolean (see comment below)" do
       # A number followed by either cm or in...
       # If cm, the number must be at least 150 and at most 193.
       # If in, the number must be at least 59 and at most 76.
-      assert Passport.valid_hgt?(%{"hgt" => "1920"})
-      assert Passport.valid_hgt?(%{"hgt" => "1979"})
-      assert Passport.valid_hgt?(%{"hgt" => "2002"})
+      assert Passport.valid_hgt?(%{"hgt" => "150cm"})
+      assert Passport.valid_hgt?(%{"hgt" => "180cm"})
+      assert Passport.valid_hgt?(%{"hgt" => "193cm"})
 
-      refute Passport.valid_hgt?(%{"hgt" => "1900"})
-      refute Passport.valid_hgt?(%{"hgt" => "2050"})
+      refute Passport.valid_hgt?(%{"hgt" => "100cm"})
+      refute Passport.valid_hgt?(%{"hgt" => "200cm"})
+
+      assert Passport.valid_hgt?(%{"hgt" => "59in"})
+      assert Passport.valid_hgt?(%{"hgt" => "63in"})
+      assert Passport.valid_hgt?(%{"hgt" => "76in"})
+
+      refute Passport.valid_hgt?(%{"hgt" => "10in"})
+      refute Passport.valid_hgt?(%{"hgt" => "190in"})
+
+      refute Passport.valid_hgt?(%{"hgt" => "190"})
       refute Passport.valid_hgt?(%{"hgt" => "1"})
+      refute Passport.valid_hgt?(%{"hgt" => "1.0"})
       refute Passport.valid_hgt?(%{"hgt" => "foo"})
       refute Passport.valid_hgt?(%{})
     end
   end
 
   describe "valid_hcl?" do
-    @tag :skip
-    test "returns boolean if TODO" do
-      # a # followed by exactly six characters 0-9 or a-f
-      assert Passport.valid_hcl?(%{"hcl" => "1920"})
-      assert Passport.valid_hcl?(%{"hcl" => "1979"})
-      assert Passport.valid_hcl?(%{"hcl" => "2002"})
+    test "returns boolean if a # symbol followed by exactly six characters 0-9 or a-f" do
+      assert Passport.valid_hcl?(%{"hcl" => "#000000"})
+      assert Passport.valid_hcl?(%{"hcl" => "#aaaaaa"})
+      assert Passport.valid_hcl?(%{"hcl" => "#929da2"})
 
-      refute Passport.valid_hcl?(%{"hcl" => "1900"})
-      refute Passport.valid_hcl?(%{"hcl" => "2050"})
+      refute Passport.valid_hcl?(%{"hcl" => "#929da22"})
+      refute Passport.valid_hcl?(%{"hcl" => "#AAAAAA"})
+      refute Passport.valid_hcl?(%{"hcl" => "a111111"})
+      refute Passport.valid_hcl?(%{"hcl" => "#aaaaaz"})
       refute Passport.valid_hcl?(%{"hcl" => "1"})
+      refute Passport.valid_hcl?(%{"hcl" => "1.0"})
       refute Passport.valid_hcl?(%{"hcl" => "foo"})
       refute Passport.valid_hcl?(%{})
     end
   end
 
   describe "valid_ecl?" do
-    @tag :skip
-    test "returns boolean if TODO" do
-      # exactly one of: amb blu brn gry grn hzl oth
-      assert Passport.valid_ecl?(%{"ecl" => "1920"})
-      assert Passport.valid_ecl?(%{"ecl" => "1979"})
-      assert Passport.valid_ecl?(%{"ecl" => "2002"})
+    test "returns boolean if 'amb' 'blu' 'brn' 'gry' 'grn' 'hzl' or 'oth'" do
+      assert Passport.valid_ecl?(%{"ecl" => "amb"})
+      assert Passport.valid_ecl?(%{"ecl" => "blu"})
+      assert Passport.valid_ecl?(%{"ecl" => "brn"})
+      assert Passport.valid_ecl?(%{"ecl" => "gry"})
+      assert Passport.valid_ecl?(%{"ecl" => "grn"})
+      assert Passport.valid_ecl?(%{"ecl" => "hzl"})
 
-      refute Passport.valid_ecl?(%{"ecl" => "1900"})
-      refute Passport.valid_ecl?(%{"ecl" => "2050"})
       refute Passport.valid_ecl?(%{"ecl" => "1"})
+      refute Passport.valid_ecl?(%{"ecl" => "1.0"})
       refute Passport.valid_ecl?(%{"ecl" => "foo"})
       refute Passport.valid_ecl?(%{})
     end
   end
 
   describe "valid_pid?" do
-    @tag :skip
-    test "returns boolean if TODO" do
-      # a nine-digit number, including leading zeroes
-      assert Passport.valid_pid?(%{"pid" => "1920"})
-      assert Passport.valid_pid?(%{"pid" => "1979"})
-      assert Passport.valid_pid?(%{"pid" => "2002"})
+    test "returns boolean if a nine-digit number, including leading zeroes" do
+      assert Passport.valid_pid?(%{"pid" => "000000001"})
+      assert Passport.valid_pid?(%{"pid" => "123456789"})
 
-      refute Passport.valid_pid?(%{"pid" => "1900"})
-      refute Passport.valid_pid?(%{"pid" => "2050"})
-      refute Passport.valid_pid?(%{"pid" => "1"})
+      refute Passport.valid_pid?(%{"pid" => "0123456789"})
+      refute Passport.valid_pid?(%{"pid" => "1.0"})
       refute Passport.valid_pid?(%{"pid" => "foo"})
       refute Passport.valid_pid?(%{})
     end
   end
 
   describe "valid?" do
-    @tag :skip
     test "returns boolean" do
       assert Passport.valid?(%{
                "iyr" => "2010",

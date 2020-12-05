@@ -1,6 +1,15 @@
 defmodule Passport do
   @list_of_lines_from_txt FileImport.list_of_lines("lib/day_4/data.txt")
   @entry_splitter "{next}"
+  @valid_eye_colors [
+    "amb",
+    "blu",
+    "brn",
+    "gry",
+    "grn",
+    "hzl",
+    "oth"
+  ]
 
   @doc """
   You arrive at the airport only to realize that you grabbed your North Pole
@@ -150,6 +159,8 @@ defmodule Passport do
   Count the number of valid passports - those that have all required fields and
   valid values. Continue to treat cid as optional. In your batch file, how many
   passports are valid?
+
+  Your puzzle answer was 158.
   """
   def strict_valid_count(list_of_lines \\ @list_of_lines_from_txt) when is_list(list_of_lines) do
     list_of_lines
@@ -176,15 +187,13 @@ defmodule Passport do
   end
 
   def valid?(%{} = map) do
-    all_reqd_fields?(map) &&
-      valid_byr?(map)
-
-    # valid_iyr?(map) &&
-    # valid_eyr?(map) &&
-    # valid_hgt?(map) &&
-    # valid_hcl?(map) &&
-    # valid_ecl?(map) &&
-    # valid_pid?(map)
+    valid_byr?(map) &&
+      valid_iyr?(map) &&
+      valid_eyr?(map) &&
+      valid_hgt?(map) &&
+      valid_hcl?(map) &&
+      valid_ecl?(map) &&
+      valid_pid?(map)
   end
 
   def all_reqd_fields?(%{
@@ -206,7 +215,68 @@ defmodule Passport do
 
   def valid_byr?(_), do: false
 
-  def int_between?(str, min, max) do
+  def valid_iyr?(%{"iyr" => iyr_str}) do
+    int_between?(iyr_str, 2010, 2020)
+  end
+
+  def valid_iyr?(_), do: false
+
+  def valid_eyr?(%{"eyr" => eyr_str}) do
+    int_between?(eyr_str, 2020, 2030)
+  end
+
+  def valid_eyr?(_), do: false
+
+  def valid_hgt?(%{"hgt" => hgt_str}) do
+    hgt_str
+    |> height_str_to_map()
+    |> valid_height_map?()
+  end
+
+  def valid_hgt?(_), do: false
+
+  def valid_hcl?(%{"hcl" => hcl_str}) do
+    Regex.match?(~r/^#[\da-f]{6}$/, hcl_str)
+  end
+
+  def valid_hcl?(_), do: false
+
+  def valid_ecl?(%{"ecl" => ecl_str}) when ecl_str in @valid_eye_colors, do: true
+  def valid_ecl?(_), do: false
+
+  def valid_pid?(%{"pid" => pid_str}) do
+    Regex.match?(~r/^[\d]{9}$/, pid_str)
+  end
+
+  def valid_pid?(_), do: false
+
+  def height_str_to_map(<<_::bytes-size(1)>>), do: %{}
+
+  def height_str_to_map(str) do
+    [last_char | [second_to_last_char | backwards_numbers]] =
+      str
+      |> String.graphemes()
+      |> Enum.reverse()
+
+    %{
+      value: backwards_numbers |> Enum.reverse() |> Enum.join(),
+      unit: "#{second_to_last_char}#{last_char}"
+    }
+  end
+
+  def valid_height_map?(%{unit: "cm", value: value}) do
+    int_between?(value, 150, 193)
+  end
+
+  def valid_height_map?(%{unit: "in", value: value}) do
+    int_between?(value, 59, 76)
+  end
+
+  def valid_height_map?(_) do
+    false
+  end
+
+  def int_between?(str, min, max) when is_binary(str) do
     case Integer.parse(str) do
       {int, ""} -> int >= min && int <= max
       _ -> false
