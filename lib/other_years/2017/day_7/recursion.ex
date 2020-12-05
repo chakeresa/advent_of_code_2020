@@ -89,9 +89,9 @@ defmodule Recursion do
   def part_2(list_of_lines \\ @list_of_lines_from_txt) do
     list_of_lines
     |> build_tower()
-    |> find_unbalanced()
+    |> find_unbalanced_disc()
     |> get_totals()
-    |> get_answer
+    |> diff_to_balance()
   end
 
   def get_totals(%Disc{children: children}) do
@@ -100,11 +100,9 @@ defmodule Recursion do
     end)
   end
 
-  def get_answer(counts_and_discs) do
-    # qajub is the problem (weight 1139, total weight 1817, parent = hnafo, sibling total weights = 1817... it is balanced!!)
+  def diff_to_balance(counts_and_discs) do
     %{bad_weight: bad_weight, good_weight: good_weight, disc_weight: disc_weight} =
       counts_and_discs
-      |> IO.inspect()
       |> Enum.map(fn
         {bad_weight, [%Disc{weight: disc_weight}]} ->
           [{:bad_weight, bad_weight}, {:disc_weight, disc_weight}]
@@ -118,10 +116,10 @@ defmodule Recursion do
     disc_weight + good_weight - bad_weight
   end
 
-  def find_unbalanced(disc_to_check, problem_disc \\ nil)
-  def find_unbalanced(nil, problem_disc), do: problem_disc
+  def find_unbalanced_disc(disc_to_check, problem_disc \\ nil)
+  def find_unbalanced_disc(nil, problem_disc), do: problem_disc
 
-  def find_unbalanced(%Disc{children: children} = disc, _parent) do
+  def find_unbalanced_disc(%Disc{children: children} = disc, _parent) do
     if Disc.balanced?(disc) do
       disc
     else
@@ -129,7 +127,7 @@ defmodule Recursion do
       |> Enum.find(fn child ->
         !Disc.balanced?(child)
       end)
-      |> find_unbalanced(disc)
+      |> find_unbalanced_disc(disc)
     end
   end
 

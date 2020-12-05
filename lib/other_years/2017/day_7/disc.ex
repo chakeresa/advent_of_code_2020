@@ -3,9 +3,11 @@ defmodule Disc do
 
   def balanced?(%__MODULE__{children: []}), do: true
 
-  def balanced?(%__MODULE__{children: [%__MODULE__{weight: first_weight} | _rest] = children}) do
-    Enum.all?(children, fn %__MODULE__{} = this_disc ->
-      first_weight == total_weight(this_disc)
+  def balanced?(%__MODULE__{children: [%__MODULE__{} = first_child | other_children]}) do
+    first_total_weight = total_weight(first_child)
+
+    Enum.all?(other_children, fn %__MODULE__{} = this_child ->
+      first_total_weight == total_weight(this_child)
     end)
   end
 

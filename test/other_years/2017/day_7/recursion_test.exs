@@ -48,9 +48,10 @@ defmodule RecursionTest do
       assert Recursion.part_2(input) == 60
     end
 
+    # skipping because slow
     @tag :skip
     test "works for the real data" do
-      assert Recursion.part_2() == "TODO"
+      assert Recursion.part_2() == 1060
     end
   end
 
