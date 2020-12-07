@@ -11,7 +11,7 @@ defmodule CustomsTest do
 
   describe "part 1 - sum_of_anyone_yes" do
     test "works for the sample data" do
-      input = assert Customs.sum_of_anyone_yes(@sample_input) == 11
+      assert Customs.sum_of_anyone_yes(@sample_input) == 11
     end
 
     test "works for the actual data" do
