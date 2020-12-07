@@ -1,5 +1,7 @@
 defmodule Customs do
-  @moduledoc """
+  @list_of_line_chunks_from_txt FileImport.list_of_line_chunks("lib/day_6/data.txt")
+
+  @doc """
   As your flight approaches the regional airport where you'll switch to a much larger plane, customs declaration forms are distributed to the passengers.
 
   The form asks a series of 26 yes-or-no questions marked a through z. All you need to do is identify the questions for which anyone in your group answers "yes". Since your group is just you, this doesn't take very long.
@@ -44,16 +46,68 @@ defmodule Customs do
 
   Your puzzle answer was 6683.
   """
-
-  @list_of_line_chunks_from_txt FileImport.list_of_line_chunks("lib/day_6/data.txt")
-
-  def sum_of_group_counts(list_of_line_chunks \\ @list_of_line_chunks_from_txt) do
+  def sum_of_anyone_yes(list_of_line_chunks \\ @list_of_line_chunks_from_txt) do
     list_of_line_chunks
     |> Enum.map(fn group_str ->
       group_str
       |> String.replace("\n", "")
       |> String.graphemes()
       |> MapSet.new()
+      |> MapSet.size()
+    end)
+    |> Enum.sum()
+  end
+
+  @doc """
+  As you finish the last group's customs declaration, you notice that you misread one word in the instructions:
+
+  You don't need to identify the questions to which anyone answered "yes"; you need to identify the questions to which everyone answered "yes"!
+
+  Using the same example as above:
+  ```
+  abc
+
+  a
+  b
+  c
+
+  ab
+  ac
+
+  a
+  a
+  a
+  a
+
+  b
+  ```
+  This list represents answers from five groups:
+
+  - In the first group, everyone (all 1 person) answered "yes" to 3 questions: a, b, and c.
+  - In the second group, there is no question to which everyone answered "yes".
+  - In the third group, everyone answered yes to only 1 question, a. Since some people did not answer "yes" to b or c, they don't count.
+  - In the fourth group, everyone answered yes to only 1 question, a.
+  - In the fifth group, everyone (all 1 person) answered "yes" to 1 question, b.
+  -
+  - In this example, the sum of these counts is 3 + 0 + 1 + 1 + 1 = 6.
+
+  For each group, count the number of questions to which everyone answered "yes". What is the sum of those counts?
+
+  Your puzzle answer was 3122.
+  """
+  def sum_of_everyone_yes(list_of_line_chunks \\ @list_of_line_chunks_from_txt) do
+    list_of_line_chunks
+    |> Enum.map(fn group_str ->
+      group_str
+      |> String.split("\n")
+      |> Enum.map(fn individual_str ->
+        individual_str
+        |> String.graphemes()
+        |> MapSet.new()
+      end)
+      |> Enum.reduce(fn individual_mapset, intersection ->
+        MapSet.intersection(intersection, individual_mapset)
+      end)
       |> MapSet.size()
     end)
     |> Enum.sum()
