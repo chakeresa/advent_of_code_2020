@@ -5,4 +5,11 @@ defmodule FileImport do
     |> String.trim_trailing()
     |> String.split("\n")
   end
+
+  def list_of_line_chunks(filepath) do
+    filepath
+    |> File.read!()
+    |> String.trim_trailing()
+    |> String.split("\n\n")
+  end
 end
