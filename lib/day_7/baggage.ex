@@ -1,7 +1,9 @@
 defmodule Baggage do
   @list_of_lines_from_txt FileImport.list_of_lines("lib/day_7/data.txt")
+  @my_bag_type "shiny gold"
+  @default_bag_count 1
 
-  defstruct [:type, count: 0, children: []]
+  defstruct [:type, count: @default_bag_count, children: []]
 
   @doc """
   You land at the regional airport in time for your next flight. In fact, it
@@ -56,7 +58,7 @@ defmodule Baggage do
     list_of_lines
     |> parse_lines_to_map()
     |> parse_map_to_structs()
-    |> Enum.filter(&contains?(&1, "shiny gold"))
+    |> Enum.filter(&contains?(&1, @my_bag_type))
     |> Enum.count()
   end
 
@@ -89,10 +91,14 @@ defmodule Baggage do
     |> String.replace(".", "")
     |> String.split(", ")
     |> Enum.map(fn child_str ->
-      Regex.named_captures(
-        ~r/^(?<count>\d+) (?<type>.*) bag(s)?/,
-        child_str
-      )
+      %{"count" => count_str} =
+        captures =
+        Regex.named_captures(
+          ~r/^(?<count>\d+) (?<type>.*) bag(s)?/,
+          child_str
+        )
+
+      %{captures | "count" => String.to_integer(count_str)}
     end)
   end
 
@@ -138,5 +144,59 @@ defmodule Baggage do
       child.type == type_to_look_for ||
         contains?(child, type_to_look_for)
     end)
+  end
+
+  @doc """
+  It's getting pretty expensive to fly these days - not because of ticket
+  prices, but because of the ridiculous number of bags you need to buy!
+
+  Consider again your shiny gold bag and the rules from the above example:
+  ```
+  faded blue bags contain 0 other bags.
+  dotted black bags contain 0 other bags.
+  vibrant plum bags contain 11 other bags: 5 faded blue bags and 6 dotted black bags.
+  dark olive bags contain 7 other bags: 3 faded blue bags and 4 dotted black bags.
+  ```
+  So, a single shiny gold bag must contain 1 dark olive bag (and the 7 bags
+  within it) plus 2 vibrant plum bags (and the 11 bags within each of those): 1
+  + 1*7 + 2 + 2*11 = 32 bags!
+
+  Of course, the actual rules have a small chance of going several levels
+  deeper than this example; be sure to count all of the bags, even if the
+  nesting becomes topologically impractical!
+
+  Here's another example:
+  ```
+  shiny gold bags contain 2 dark red bags.
+  dark red bags contain 2 dark orange bags.
+  dark orange bags contain 2 dark yellow bags.
+  dark yellow bags contain 2 dark green bags.
+  dark green bags contain 2 dark blue bags.
+  dark blue bags contain 2 dark violet bags.
+  dark violet bags contain no other bags.
+  ```
+  In this example, a single shiny gold bag must contain 126 other bags.
+
+  How many individual bags are required inside your single shiny gold bag?
+  """
+  def my_bag_contains_count(list_of_lines \\ @list_of_lines_from_txt) do
+    type_to_children_map = parse_lines_to_map(list_of_lines)
+    list_of_child_maps = Map.get(type_to_children_map, @my_bag_type)
+
+    %__MODULE__{
+      type: @my_bag_type,
+      children: Enum.map(list_of_child_maps, &build_baggage(&1, type_to_children_map))
+    }
+    |> total_bag_count()
+    |> Kernel.-(@default_bag_count)
+  end
+
+  def total_bag_count(%__MODULE__{count: count, children: children}) do
+    total_of_children =
+      children
+      |> Enum.map(&total_bag_count(&1))
+      |> Enum.sum()
+
+    count + count * total_of_children
   end
 end
