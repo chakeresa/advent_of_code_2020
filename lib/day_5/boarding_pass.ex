@@ -139,8 +139,9 @@ defmodule BoardingPass do
     highest_seat_id = List.last(rest)
 
     lowest_seat_id..highest_seat_id
-    |> Enum.into([])
-    |> Kernel.--(seat_ids)
+    |> MapSet.new()
+    |> MapSet.difference(MapSet.new(seat_ids))
+    |> MapSet.to_list()
     |> List.first()
   end
 end
