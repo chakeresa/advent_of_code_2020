@@ -16,6 +16,12 @@ defmodule BoardingPassTest do
     end
   end
 
+  describe "part 2: my_seat" do
+    test "works for the real data" do
+      assert BoardingPass.my_seat() == 642
+    end
+  end
+
   describe "seat_id" do
     test "returns the seat ID for the string" do
       assert BoardingPass.seat_id("FBFBBFFRLR") == 357

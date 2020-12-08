@@ -55,11 +55,19 @@ defmodule BoardingPass do
   BBFFBBFRLL: row 102, column 4, seat ID 820.
   As a sanity check, look through your list of boarding passes. What is the
   highest seat ID on a boarding pass?
+
+  Your puzzle answer was 919.
   """
   def highest_seat_id(list_of_lines \\ @list_of_lines_from_txt) when is_list(list_of_lines) do
     list_of_lines
+    |> all_seat_ids()
+    |> List.last()
+  end
+
+  def all_seat_ids(list_of_lines) do
+    list_of_lines
     |> Enum.map(&seat_id/1)
-    |> Enum.max()
+    |> Enum.sort()
   end
 
   def seat_id(seat_str) do
@@ -109,5 +117,30 @@ defmodule BoardingPass do
     |> Enum.join()
     |> Integer.parse(2)
     |> elem(0)
+  end
+
+  @doc """
+  Ding! The "fasten seat belt" signs have turned on. Time to find your seat.
+
+  It's a completely full flight, so your seat should be the only missing
+  boarding pass in your list. However, there's a catch: some of the seats at
+  the very front and back of the plane don't exist on this aircraft, so they'll
+  be missing from your list as well.
+
+  Your seat wasn't at the very front or back, though; the seats with IDs +1 and
+  -1 from yours will be in your list.
+
+  What is the ID of your seat?
+
+  Your puzzle answer was 642.
+  """
+  def my_seat(list_of_lines \\ @list_of_lines_from_txt) do
+    [lowest_seat_id | rest] = seat_ids = all_seat_ids(list_of_lines)
+    highest_seat_id = List.last(rest)
+
+    lowest_seat_id..highest_seat_id
+    |> Enum.into([])
+    |> Kernel.--(seat_ids)
+    |> List.first()
   end
 end
