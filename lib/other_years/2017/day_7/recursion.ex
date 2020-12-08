@@ -170,6 +170,5 @@ defmodule Recursion do
 
         %Disc{name: name, weight: weight, children: children}
     end
-
   end
 end
