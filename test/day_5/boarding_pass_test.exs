@@ -12,7 +12,7 @@ defmodule BoardingPassTest do
     end
 
     test "works for the real data" do
-      assert BoardingPass.highest_seat_id() == 42
+      assert BoardingPass.highest_seat_id() == 919
     end
   end
 

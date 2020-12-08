@@ -81,19 +81,13 @@ defmodule BoardingPass do
     seat_str
     |> String.graphemes()
     |> Enum.take(7)
-    |> Enum.reduce(
-      [0, 127],
-      fn char, [min, max] ->
-        new_length = (max - min + 1) |> Integer.floor_div(2)
-
-        case char do
-          "F" -> [min, min + new_length - 1]
-          "B" -> [min + new_length, max]
-        end
-      end
-    )
-    |> List.first()
-    |> trunc()
+    |> Enum.map(fn
+      "F" -> 0
+      "B" -> 1
+    end)
+    |> Enum.join()
+    |> Integer.parse(2)
+    |> elem(0)
   end
 
   @doc """
@@ -108,18 +102,12 @@ defmodule BoardingPass do
     seat_str
     |> String.graphemes()
     |> Enum.take(-3)
-    |> Enum.reduce(
-      [0, 7],
-      fn char, [min, max] ->
-        new_length = ((max - min + 1) / 2) |> Float.floor()
-
-        case char do
-          "L" -> [min, min + new_length - 1]
-          "R" -> [min + new_length, max]
-        end
-      end
-    )
-    |> List.first()
-    |> trunc()
+    |> Enum.map(fn
+      "L" -> 0
+      "R" -> 1
+    end)
+    |> Enum.join()
+    |> Integer.parse(2)
+    |> elem(0)
   end
 end
