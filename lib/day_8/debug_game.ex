@@ -206,6 +206,57 @@ defmodule DebugGame do
         } = debug,
         instruction_index
       ) do
+    updated_debug = %{debug | line_history: MapSet.put(line_history, instruction_index)}
+    instruction = Enum.at(instructions, instruction_index)
+
+    case Regex.named_captures(~r/(?<operation>\w{3}) (?<sign>.)(?<number>.+)/, instruction) do
+      %{"operation" => "nop"} ->
+        {
+          updated_debug,
+          instruction_index + 1
+        }
+
+      %{"number" => number_str, "operation" => "acc", "sign" => "+"} ->
+        {
+          %{
+            updated_debug
+            | accumulator: accum + String.to_integer(number_str)
+          },
+          instruction_index + 1
+        }
+
+      %{"number" => number_str, "operation" => "acc", "sign" => "-"} ->
+        {
+          %{
+            updated_debug
+            | accumulator: accum - String.to_integer(number_str)
+          },
+          instruction_index + 1
+        }
+
+      %{"number" => number_str, "operation" => "jmp", "sign" => "+"} ->
+        {
+          updated_debug,
+          instruction_index + String.to_integer(number_str)
+        }
+
+      %{"number" => number_str, "operation" => "jmp", "sign" => "-"} ->
+        {
+          updated_debug,
+          instruction_index - String.to_integer(number_str)
+        }
+    end
+    |> check_part2_exit_condition()
+  end
+
+  def check_part2_exit_condition({
+        %__MODULE__{
+          instructions: instructions,
+          accumulator: accum,
+          line_history: %MapSet{} = line_history
+        } = debug,
+        instruction_index
+      }) do
     cond do
       instruction_index in line_history ->
         nil
@@ -217,47 +268,7 @@ defmodule DebugGame do
         accum
 
       true ->
-        # TODO: DRY up this part copied from goto1
-        updated_debug = %{debug | line_history: MapSet.put(line_history, instruction_index)}
-        instruction = Enum.at(instructions, instruction_index)
-
-        case Regex.named_captures(~r/(?<operation>\w{3}) (?<sign>.)(?<number>.+)/, instruction) do
-          %{"operation" => "nop"} ->
-            goto2(
-              updated_debug,
-              instruction_index + 1
-            )
-
-          %{"number" => number_str, "operation" => "acc", "sign" => "+"} ->
-            goto2(
-              %{
-                updated_debug
-                | accumulator: accum + String.to_integer(number_str)
-              },
-              instruction_index + 1
-            )
-
-          %{"number" => number_str, "operation" => "acc", "sign" => "-"} ->
-            goto2(
-              %{
-                updated_debug
-                | accumulator: accum - String.to_integer(number_str)
-              },
-              instruction_index + 1
-            )
-
-          %{"number" => number_str, "operation" => "jmp", "sign" => "+"} ->
-            goto2(
-              updated_debug,
-              instruction_index + String.to_integer(number_str)
-            )
-
-          %{"number" => number_str, "operation" => "jmp", "sign" => "-"} ->
-            goto2(
-              updated_debug,
-              instruction_index - String.to_integer(number_str)
-            )
-        end
+        goto2(debug, instruction_index)
     end
   end
 end
