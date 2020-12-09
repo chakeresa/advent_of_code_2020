@@ -22,4 +22,14 @@ defmodule DebugGameTest do
       assert DebugGame.accum_when_loop_restarts() == 2014
     end
   end
+
+  describe "part 2 - accum_when_fixed" do
+    test "works for the sample data" do
+      assert DebugGame.accum_when_fixed(@sample_input) == 8
+    end
+
+    test "works for the actual data" do
+      assert DebugGame.accum_when_fixed() == 2251
+    end
+  end
 end

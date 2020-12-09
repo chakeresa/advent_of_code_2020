@@ -76,10 +76,10 @@ defmodule DebugGame do
   Your puzzle answer was 2014.
   """
   def accum_when_loop_restarts(list_of_lines \\ @list_of_lines_from_txt) do
-    goto(%__MODULE__{instructions: list_of_lines}, 0)
+    goto1(%__MODULE__{instructions: list_of_lines}, 0)
   end
 
-  def goto(
+  def goto1(
         %__MODULE__{instructions: instructions, accumulator: accum, line_history: line_history} =
           debug,
         instruction_index
@@ -92,13 +92,13 @@ defmodule DebugGame do
 
       case Regex.named_captures(~r/(?<operation>\w{3}) (?<sign>.)(?<number>.+)/, instruction) do
         %{"operation" => "nop"} ->
-          goto(
+          goto1(
             updated_debug,
             instruction_index + 1
           )
 
         %{"number" => number_str, "operation" => "acc", "sign" => "+"} ->
-          goto(
+          goto1(
             %{
               updated_debug
               | accumulator: accum + String.to_integer(number_str)
@@ -107,7 +107,7 @@ defmodule DebugGame do
           )
 
         %{"number" => number_str, "operation" => "acc", "sign" => "-"} ->
-          goto(
+          goto1(
             %{
               updated_debug
               | accumulator: accum - String.to_integer(number_str)
@@ -116,17 +116,148 @@ defmodule DebugGame do
           )
 
         %{"number" => number_str, "operation" => "jmp", "sign" => "+"} ->
-          goto(
+          goto1(
             updated_debug,
             instruction_index + String.to_integer(number_str)
           )
 
         %{"number" => number_str, "operation" => "jmp", "sign" => "-"} ->
-          goto(
+          goto1(
             updated_debug,
             instruction_index - String.to_integer(number_str)
           )
       end
+    end
+  end
+
+  @doc """
+  After some careful analysis, you believe that exactly one instruction is
+  corrupted.
+
+  Somewhere in the program, either a jmp is supposed to be a nop, or a nop is
+  supposed to be a jmp. (No acc instructions were harmed in the corruption of
+  this boot code.)
+
+  The program is supposed to terminate by attempting to execute an instruction
+  immediately after the last instruction in the file. By changing exactly one
+  jmp or nop, you can repair the boot code and make it terminate correctly.
+
+  For example, consider the same program from above:
+  ```
+  nop +0
+  acc +1
+  jmp +4
+  acc +3
+  jmp -3
+  acc -99
+  acc +1
+  jmp -4
+  acc +6
+  ```
+  If you change the first instruction from nop +0 to jmp +0, it would create a
+  single-instruction infinite loop, never leaving that instruction. If you
+  change almost any of the jmp instructions, the program will still eventually
+  find another jmp instruction and loop forever.
+
+  However, if you change the second-to-last instruction (from jmp -4 to nop
+  -4), the program terminates! The instructions are visited in this order:
+  ```
+  nop +0  | 1
+  acc +1  | 2
+  jmp +4  | 3
+  acc +3  |
+  jmp -3  |
+  acc -99 |
+  acc +1  | 4
+  nop -4  | 5
+  acc +6  | 6
+  ```
+  After the last instruction (acc +6), the program terminates by attempting to
+  run the instruction below the last instruction in the file. With this change,
+  after the program terminates, the accumulator contains the value 8 (acc +1,
+  acc +1, acc +6).
+
+  Fix the program so that it terminates normally by changing exactly one jmp
+  (to nop) or nop (to jmp). What is the value of the accumulator after the
+  program terminates?
+
+  Your puzzle answer was 2251.
+  """
+  def accum_when_fixed(instructions \\ @list_of_lines_from_txt) when is_list(instructions) do
+    instructions
+    |> Enum.with_index()
+    |> Enum.map(fn {_orig_instr, instr_index} ->
+      new_instructions = List.update_at(instructions, instr_index, &edit_instruction(&1))
+
+      goto2(%__MODULE__{instructions: new_instructions}, 0)
+    end)
+    |> Enum.find(&(!is_nil(&1)))
+  end
+
+  def edit_instruction("acc" <> _rest = original_instr), do: original_instr
+  def edit_instruction("jmp" <> rest), do: "nop" <> rest
+  def edit_instruction("nop" <> rest), do: "jmp" <> rest
+
+  def goto2(
+        %__MODULE__{
+          instructions: instructions,
+          accumulator: accum,
+          line_history: %MapSet{} = line_history
+        } = debug,
+        instruction_index
+      ) do
+    cond do
+      instruction_index in line_history ->
+        nil
+
+      instruction_index > length(instructions) ->
+        nil
+
+      instruction_index == length(instructions) ->
+        accum
+
+      true ->
+        # TODO: DRY up this part copied from goto1
+        updated_debug = %{debug | line_history: MapSet.put(line_history, instruction_index)}
+        instruction = Enum.at(instructions, instruction_index)
+
+        case Regex.named_captures(~r/(?<operation>\w{3}) (?<sign>.)(?<number>.+)/, instruction) do
+          %{"operation" => "nop"} ->
+            goto2(
+              updated_debug,
+              instruction_index + 1
+            )
+
+          %{"number" => number_str, "operation" => "acc", "sign" => "+"} ->
+            goto2(
+              %{
+                updated_debug
+                | accumulator: accum + String.to_integer(number_str)
+              },
+              instruction_index + 1
+            )
+
+          %{"number" => number_str, "operation" => "acc", "sign" => "-"} ->
+            goto2(
+              %{
+                updated_debug
+                | accumulator: accum - String.to_integer(number_str)
+              },
+              instruction_index + 1
+            )
+
+          %{"number" => number_str, "operation" => "jmp", "sign" => "+"} ->
+            goto2(
+              updated_debug,
+              instruction_index + String.to_integer(number_str)
+            )
+
+          %{"number" => number_str, "operation" => "jmp", "sign" => "-"} ->
+            goto2(
+              updated_debug,
+              instruction_index - String.to_integer(number_str)
+            )
+        end
     end
   end
 end
