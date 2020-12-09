@@ -189,7 +189,7 @@ defmodule DebugGame do
     |> Enum.map(fn {_orig_instr, instr_index} ->
       new_instructions = List.update_at(instructions, instr_index, &edit_instruction(&1))
 
-      goto2(%__MODULE__{instructions: new_instructions}, 0)
+      part2_final_accum(%__MODULE__{instructions: new_instructions}, 0)
     end)
     |> Enum.find(&(!is_nil(&1)))
   end
@@ -198,7 +198,16 @@ defmodule DebugGame do
   def edit_instruction("jmp" <> rest), do: "nop" <> rest
   def edit_instruction("nop" <> rest), do: "jmp" <> rest
 
-  def goto2(
+  def part2_final_accum(
+        %__MODULE__{} = debug,
+        instruction_index
+      ) do
+    debug
+    |> goto(instruction_index)
+    |> check_part2_exit_condition()
+  end
+
+  def goto(
         %__MODULE__{
           instructions: instructions,
           accumulator: accum,
@@ -246,7 +255,6 @@ defmodule DebugGame do
           instruction_index - String.to_integer(number_str)
         }
     end
-    |> check_part2_exit_condition()
   end
 
   def check_part2_exit_condition({
@@ -268,7 +276,7 @@ defmodule DebugGame do
         accum
 
       true ->
-        goto2(debug, instruction_index)
+        part2_final_accum(debug, instruction_index)
     end
   end
 end
