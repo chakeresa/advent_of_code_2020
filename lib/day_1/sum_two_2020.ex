@@ -42,11 +42,11 @@ defmodule SumTwo2020 do
 
   @list_of_lines_from_txt FileImport.list_of_lines("lib/day_1/data.txt")
 
-  def target, do: 2020
+  def default_target, do: 2020
 
-  def solution(list_of_lines \\ @list_of_lines_from_txt) do
+  def solution(list_of_lines \\ @list_of_lines_from_txt, target \\ default_target()) do
     sorted_list(list_of_lines)
-    |> pare_down_list(target())
+    |> pare_down_list(target)
     |> multiply()
   end
 
@@ -75,5 +75,9 @@ defmodule SumTwo2020 do
     end
   end
 
-  def multiply([first | _rest]), do: (target() - first) * first
+  def multiply([first | rest]) do
+    List.last(rest) * first
+  end
+
+  def multiply(_), do: nil
 end

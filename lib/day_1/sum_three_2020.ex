@@ -21,7 +21,7 @@ defmodule SumThree2020 do
 
     Enum.reduce_while(sorted, sorted, fn _elem, [first | tail] ->
       tail
-      |> SumTwo2020.pare_down_list(SumTwo2020.target() - first)
+      |> SumTwo2020.pare_down_list(SumTwo2020.default_target() - first)
       |> case do
         [] -> {:cont, tail}
         [_] -> {:cont, tail}
@@ -31,7 +31,7 @@ defmodule SumThree2020 do
   end
 
   def multiply(first, second) do
-    third = SumTwo2020.target() - first - second
+    third = SumTwo2020.default_target() - first - second
     first * second * third
   end
 end

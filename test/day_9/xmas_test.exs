@@ -1,4 +1,4 @@
-defmodule TemplateTest do
+defmodule XMASTest do
   use ExUnit.Case
 
   @sample_input [
@@ -26,12 +26,11 @@ defmodule TemplateTest do
 
   describe "part 1 - part_1" do
     test "works for the sample data" do
-      assert Template.part_1(@sample_input) == 127
+      assert XMAS.part_1(@sample_input, 5) == 127
     end
 
-    @tag :skip
     test "works for the actual data" do
-      assert Template.part_1() == "TODO"
+      assert XMAS.part_1() == 29_221_323
     end
   end
 end

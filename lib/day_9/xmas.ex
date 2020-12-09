@@ -1,5 +1,11 @@
-defmodule Template do
+defmodule XMAS do
   @list_of_lines_from_txt FileImport.list_of_lines("lib/day_9/data.txt")
+
+  defstruct [
+    :index,
+    :list_of_lines,
+    :preamble_length
+  ]
 
   @doc """
   With your neighbor happily enjoying their video game, you turn your attention
@@ -72,9 +78,42 @@ defmodule Template do
   first number in the list (after the preamble) which is not the sum of two of
   the 25 numbers before it. What is the first number that does not have this
   property?
+
+  Your puzzle answer was 29221323.
   """
-  def part_1(list_of_lines \\ @list_of_lines_from_txt) do
+  def part_1(list_of_lines \\ @list_of_lines_from_txt, preamble_length \\ 25) do
+    %__MODULE__{
+      index: preamble_length,
+      list_of_lines: list_of_lines,
+      preamble_length: preamble_length
+    }
+    |> next()
+  end
+
+  def valid?(%__MODULE__{
+        index: index,
+        list_of_lines: list_of_lines,
+        preamble_length: preamble_length
+      }) do
+    lines_to_draw_from = Enum.slice(list_of_lines, index - preamble_length, preamble_length)
+
+    target = integer_at(list_of_lines, index)
+
+    !is_nil(SumTwo2020.solution(lines_to_draw_from, target))
+  end
+
+  def next(%__MODULE__{index: index, list_of_lines: list_of_lines} = xmas) do
+    if valid?(xmas) do
+      %{xmas | index: index + 1} |> next()
+    else
+      integer_at(list_of_lines, index)
+    end
+  end
+
+  def integer_at(list_of_lines, index) do
     list_of_lines
+    |> Enum.at(index)
+    |> String.to_integer()
   end
 
   @doc """
