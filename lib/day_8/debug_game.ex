@@ -76,57 +76,29 @@ defmodule DebugGame do
   Your puzzle answer was 2014.
   """
   def accum_when_loop_restarts(list_of_lines \\ @list_of_lines_from_txt) do
-    goto1(%__MODULE__{instructions: list_of_lines}, 0)
+    part1_final_accum(%__MODULE__{instructions: list_of_lines}, 0)
   end
 
-  def goto1(
-        %__MODULE__{instructions: instructions, accumulator: accum, line_history: line_history} =
-          debug,
+  def part1_final_accum(
+        %__MODULE__{} = debug,
         instruction_index
       ) do
+    debug
+    |> goto(instruction_index)
+    |> part1_exit_or_continue()
+  end
+
+  def part1_exit_or_continue({
+        %__MODULE__{
+          accumulator: accum,
+          line_history: %MapSet{} = line_history
+        } = debug,
+        instruction_index
+      }) do
     if instruction_index in line_history do
       accum
     else
-      updated_debug = %{debug | line_history: MapSet.put(line_history, instruction_index)}
-      instruction = Enum.at(instructions, instruction_index)
-
-      case Regex.named_captures(~r/(?<operation>\w{3}) (?<sign>.)(?<number>.+)/, instruction) do
-        %{"operation" => "nop"} ->
-          goto1(
-            updated_debug,
-            instruction_index + 1
-          )
-
-        %{"number" => number_str, "operation" => "acc", "sign" => "+"} ->
-          goto1(
-            %{
-              updated_debug
-              | accumulator: accum + String.to_integer(number_str)
-            },
-            instruction_index + 1
-          )
-
-        %{"number" => number_str, "operation" => "acc", "sign" => "-"} ->
-          goto1(
-            %{
-              updated_debug
-              | accumulator: accum - String.to_integer(number_str)
-            },
-            instruction_index + 1
-          )
-
-        %{"number" => number_str, "operation" => "jmp", "sign" => "+"} ->
-          goto1(
-            updated_debug,
-            instruction_index + String.to_integer(number_str)
-          )
-
-        %{"number" => number_str, "operation" => "jmp", "sign" => "-"} ->
-          goto1(
-            updated_debug,
-            instruction_index - String.to_integer(number_str)
-          )
-      end
+      part1_final_accum(debug, instruction_index)
     end
   end
 
@@ -189,7 +161,7 @@ defmodule DebugGame do
     |> Enum.map(fn {_orig_instr, instr_index} ->
       new_instructions = List.update_at(instructions, instr_index, &edit_instruction(&1))
 
-      goto2(%__MODULE__{instructions: new_instructions}, 0)
+      part2_final_accum(%__MODULE__{instructions: new_instructions}, 0)
     end)
     |> Enum.find(&(!is_nil(&1)))
   end
@@ -198,7 +170,16 @@ defmodule DebugGame do
   def edit_instruction("jmp" <> rest), do: "nop" <> rest
   def edit_instruction("nop" <> rest), do: "jmp" <> rest
 
-  def goto2(
+  def part2_final_accum(
+        %__MODULE__{} = debug,
+        instruction_index
+      ) do
+    debug
+    |> goto(instruction_index)
+    |> part2_exit_or_continue()
+  end
+
+  def goto(
         %__MODULE__{
           instructions: instructions,
           accumulator: accum,
@@ -206,6 +187,56 @@ defmodule DebugGame do
         } = debug,
         instruction_index
       ) do
+    updated_debug = %{debug | line_history: MapSet.put(line_history, instruction_index)}
+    instruction = Enum.at(instructions, instruction_index)
+
+    case Regex.named_captures(~r/(?<operation>\w{3}) (?<sign>.)(?<number>.+)/, instruction) do
+      %{"operation" => "nop"} ->
+        {
+          updated_debug,
+          instruction_index + 1
+        }
+
+      %{"number" => number_str, "operation" => "acc", "sign" => "+"} ->
+        {
+          %{
+            updated_debug
+            | accumulator: accum + String.to_integer(number_str)
+          },
+          instruction_index + 1
+        }
+
+      %{"number" => number_str, "operation" => "acc", "sign" => "-"} ->
+        {
+          %{
+            updated_debug
+            | accumulator: accum - String.to_integer(number_str)
+          },
+          instruction_index + 1
+        }
+
+      %{"number" => number_str, "operation" => "jmp", "sign" => "+"} ->
+        {
+          updated_debug,
+          instruction_index + String.to_integer(number_str)
+        }
+
+      %{"number" => number_str, "operation" => "jmp", "sign" => "-"} ->
+        {
+          updated_debug,
+          instruction_index - String.to_integer(number_str)
+        }
+    end
+  end
+
+  def part2_exit_or_continue({
+        %__MODULE__{
+          instructions: instructions,
+          accumulator: accum,
+          line_history: %MapSet{} = line_history
+        } = debug,
+        instruction_index
+      }) do
     cond do
       instruction_index in line_history ->
         nil
@@ -217,47 +248,7 @@ defmodule DebugGame do
         accum
 
       true ->
-        # TODO: DRY up this part copied from goto1
-        updated_debug = %{debug | line_history: MapSet.put(line_history, instruction_index)}
-        instruction = Enum.at(instructions, instruction_index)
-
-        case Regex.named_captures(~r/(?<operation>\w{3}) (?<sign>.)(?<number>.+)/, instruction) do
-          %{"operation" => "nop"} ->
-            goto2(
-              updated_debug,
-              instruction_index + 1
-            )
-
-          %{"number" => number_str, "operation" => "acc", "sign" => "+"} ->
-            goto2(
-              %{
-                updated_debug
-                | accumulator: accum + String.to_integer(number_str)
-              },
-              instruction_index + 1
-            )
-
-          %{"number" => number_str, "operation" => "acc", "sign" => "-"} ->
-            goto2(
-              %{
-                updated_debug
-                | accumulator: accum - String.to_integer(number_str)
-              },
-              instruction_index + 1
-            )
-
-          %{"number" => number_str, "operation" => "jmp", "sign" => "+"} ->
-            goto2(
-              updated_debug,
-              instruction_index + String.to_integer(number_str)
-            )
-
-          %{"number" => number_str, "operation" => "jmp", "sign" => "-"} ->
-            goto2(
-              updated_debug,
-              instruction_index - String.to_integer(number_str)
-            )
-        end
+        part2_final_accum(debug, instruction_index)
     end
   end
 end
