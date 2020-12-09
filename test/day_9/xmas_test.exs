@@ -24,13 +24,24 @@ defmodule XMASTest do
     "576"
   ]
 
-  describe "part 1 - part_1" do
+  describe "part 1 - weakness_value" do
     test "works for the sample data" do
-      assert XMAS.part_1(@sample_input, 5) == 127
+      assert XMAS.weakness_value(@sample_input, 5) == 127
     end
 
     test "works for the actual data" do
-      assert XMAS.part_1() == 29_221_323
+      assert XMAS.weakness_value() == 29_221_323
+    end
+  end
+
+  describe "part 2 - part_2" do
+    test "works for the sample data" do
+      assert XMAS.part_2(@sample_input, 5) == 62
+    end
+
+    @tag :skip
+    test "works for the actual data" do
+      assert XMAS.part_2() == "TODO"
     end
   end
 end

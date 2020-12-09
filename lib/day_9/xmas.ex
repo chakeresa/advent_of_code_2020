@@ -81,13 +81,23 @@ defmodule XMAS do
 
   Your puzzle answer was 29221323.
   """
-  def part_1(list_of_lines \\ @list_of_lines_from_txt, preamble_length \\ 25) do
-    %__MODULE__{
-      index: preamble_length,
-      list_of_lines: list_of_lines,
-      preamble_length: preamble_length
-    }
-    |> next()
+  def weakness_value(list_of_lines \\ @list_of_lines_from_txt, preamble_length \\ 25) do
+    integer_at(
+      list_of_lines,
+      weakness_index(list_of_lines, preamble_length)
+    )
+  end
+
+  def weakness_index(list_of_lines, preamble_length) do
+    %__MODULE__{index: index} =
+      %__MODULE__{
+        index: preamble_length,
+        list_of_lines: list_of_lines,
+        preamble_length: preamble_length
+      }
+      |> next()
+
+    index
   end
 
   def valid?(%__MODULE__{
@@ -102,11 +112,11 @@ defmodule XMAS do
     !is_nil(SumTwo2020.solution(lines_to_draw_from, target))
   end
 
-  def next(%__MODULE__{index: index, list_of_lines: list_of_lines} = xmas) do
+  def next(%__MODULE__{index: index} = xmas) do
     if valid?(xmas) do
       %{xmas | index: index + 1} |> next()
     else
-      integer_at(list_of_lines, index)
+      xmas
     end
   end
 
@@ -117,9 +127,46 @@ defmodule XMAS do
   end
 
   @doc """
-  TODO
+  The final step in breaking the XMAS encryption relies on the invalid number
+  you just found: you must find a contiguous set of at least two numbers in your
+  list which sum to the invalid number from step 1.
+
+  Again consider the above example:
+  ```
+  35
+  20
+  15
+  25
+  47
+  40
+  62
+  55
+  65
+  95
+  102
+  117
+  150
+  182
+  127
+  219
+  299
+  277
+  309
+  576
+  ```
+  In this list, adding up all of the numbers from 15 through 40 produces the
+  invalid number from step 1, 127. (Of course, the contiguous set of numbers in
+  your actual list might be much longer.)
+
+  To find the encryption weakness, add together the smallest and largest number
+  in this contiguous range; in this example, these are 15 and 47, producing 62.
+
+  What is the encryption weakness in your XMAS-encrypted list of numbers?
   """
-  def part_2(list_of_lines \\ @list_of_lines_from_txt) do
-    list_of_lines
+  def part_2(list_of_lines \\ @list_of_lines_from_txt, preamble_length \\ 25) do
+    weakness_value = weakness_value(list_of_lines, preamble_length)
+
+    # TODO: iterate from top to bottom checking whether an increasingly larger chunk sums to the weakness_value
+    # return min from range + max from range
   end
 end
