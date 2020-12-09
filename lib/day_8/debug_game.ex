@@ -1,5 +1,7 @@
-defmodule Thing2 do
-  @list_of_line_chunks_from_txt FileImport.list_of_line_chunks("lib/day_8/data.txt")
+defmodule DebugGame do
+  @list_of_lines_from_txt FileImport.list_of_lines("lib/day_8/data.txt")
+
+  defstruct [:instructions, accumulator: 0, line_history: MapSet.new()]
 
   @doc """
   Your flight to the major airline hub reaches cruising altitude without
@@ -70,7 +72,61 @@ defmodule Thing2 do
 
   Run your copy of the boot code. Immediately before any instruction is
   executed a second time, what value is in the accumulator?
+
+  Your puzzle answer was 2014.
   """
-  def part_1(list_of_line_chunks \\ @list_of_line_chunks_from_txt) do
+  def accum_when_loop_restarts(list_of_lines \\ @list_of_lines_from_txt) do
+    goto(%__MODULE__{instructions: list_of_lines}, 0)
+  end
+
+  def goto(
+        %__MODULE__{instructions: instructions, accumulator: accum, line_history: line_history} =
+          debug,
+        instruction_index
+      ) do
+    if instruction_index in line_history do
+      accum
+    else
+      updated_debug = %{debug | line_history: MapSet.put(line_history, instruction_index)}
+      instruction = Enum.at(instructions, instruction_index)
+
+      case Regex.named_captures(~r/(?<operation>\w{3}) (?<sign>.)(?<number>.+)/, instruction) do
+        %{"operation" => "nop"} ->
+          goto(
+            updated_debug,
+            instruction_index + 1
+          )
+
+        %{"number" => number_str, "operation" => "acc", "sign" => "+"} ->
+          goto(
+            %{
+              updated_debug
+              | accumulator: accum + String.to_integer(number_str)
+            },
+            instruction_index + 1
+          )
+
+        %{"number" => number_str, "operation" => "acc", "sign" => "-"} ->
+          goto(
+            %{
+              updated_debug
+              | accumulator: accum - String.to_integer(number_str)
+            },
+            instruction_index + 1
+          )
+
+        %{"number" => number_str, "operation" => "jmp", "sign" => "+"} ->
+          goto(
+            updated_debug,
+            instruction_index + String.to_integer(number_str)
+          )
+
+        %{"number" => number_str, "operation" => "jmp", "sign" => "-"} ->
+          goto(
+            updated_debug,
+            instruction_index - String.to_integer(number_str)
+          )
+      end
+    end
   end
 end
