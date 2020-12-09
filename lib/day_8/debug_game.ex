@@ -85,10 +85,10 @@ defmodule DebugGame do
       ) do
     debug
     |> goto(instruction_index)
-    |> check_part1_exit_condition()
+    |> part1_exit_or_continue()
   end
 
-  def check_part1_exit_condition({
+  def part1_exit_or_continue({
         %__MODULE__{
           accumulator: accum,
           line_history: %MapSet{} = line_history
@@ -176,7 +176,7 @@ defmodule DebugGame do
       ) do
     debug
     |> goto(instruction_index)
-    |> check_part2_exit_condition()
+    |> part2_exit_or_continue()
   end
 
   def goto(
@@ -229,7 +229,7 @@ defmodule DebugGame do
     end
   end
 
-  def check_part2_exit_condition({
+  def part2_exit_or_continue({
         %__MODULE__{
           instructions: instructions,
           accumulator: accum,
