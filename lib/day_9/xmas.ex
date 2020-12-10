@@ -191,14 +191,20 @@ defmodule XMAS do
   end
 
   def find_range(
-        %__MODULE__.Part2{start_index: start_index, end_index: end_index, max_index: max_index} =
-          data
+        %__MODULE__.Part2{
+          start_index: start_index,
+          end_index: end_index,
+          max_index: max_index,
+          sum_to: sum_to
+        } = data
       ) do
+    this_sum = sum_of_range(data)
+
     cond do
-      solution?(data) ->
+      this_sum == sum_to ->
         data
 
-      end_index < max_index ->
+      this_sum < sum_to && end_index < max_index ->
         %{data | end_index: end_index + 1} |> find_range()
 
       true ->
@@ -206,15 +212,13 @@ defmodule XMAS do
     end
   end
 
-  def solution?(%__MODULE__.Part2{
+  def sum_of_range(%__MODULE__.Part2{
         start_index: start_index,
         end_index: end_index,
-        sum_to: sum_to,
         list_of_integers: list_of_integers
       }) do
-    sum_to ==
-      list_of_integers
-      |> Enum.slice(start_index..end_index)
-      |> Enum.sum()
+    list_of_integers
+    |> Enum.slice(start_index..end_index)
+    |> Enum.sum()
   end
 end
