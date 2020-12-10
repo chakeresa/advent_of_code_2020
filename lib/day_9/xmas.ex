@@ -7,6 +7,10 @@ defmodule XMAS do
     :preamble_length
   ]
 
+  defmodule Part2 do
+    defstruct [:start_index, :end_index, :max_index, :sum_to, :list_of_integers]
+  end
+
   @doc """
   With your neighbor happily enjoying their video game, you turn your attention
   to an open data port on the little screen in the seat in front of you.
@@ -164,9 +168,53 @@ defmodule XMAS do
   What is the encryption weakness in your XMAS-encrypted list of numbers?
   """
   def part_2(list_of_lines \\ @list_of_lines_from_txt, preamble_length \\ 25) do
-    weakness_value = weakness_value(list_of_lines, preamble_length)
+    weakness_idx = weakness_index(list_of_lines, preamble_length)
+    goal = integer_at(list_of_lines, weakness_idx)
+    list_of_integers = Enum.map(list_of_lines, &String.to_integer/1)
 
-    # TODO: iterate from top to bottom checking whether an increasingly larger chunk sums to the weakness_value
-    # return min from range + max from range
+    %__MODULE__.Part2{start_index: soln_start_idx, end_index: soln_end_idx} =
+      %__MODULE__.Part2{
+        sum_to: goal,
+        max_index: weakness_idx,
+        start_index: 0,
+        end_index: 1,
+        list_of_integers: list_of_integers
+      }
+      |> find_range()
+
+    summed_ints =
+      list_of_integers
+      |> Enum.slice(soln_start_idx..soln_end_idx)
+      |> Enum.sort()
+
+    List.first(summed_ints) + List.last(summed_ints)
+  end
+
+  def find_range(
+        %__MODULE__.Part2{start_index: start_index, end_index: end_index, max_index: max_index} =
+          data
+      ) do
+    cond do
+      solution?(data) ->
+        data
+
+      end_index < max_index ->
+        %{data | end_index: end_index + 1} |> find_range()
+
+      true ->
+        %{data | start_index: start_index + 1, end_index: start_index + 2} |> find_range()
+    end
+  end
+
+  def solution?(%__MODULE__.Part2{
+        start_index: start_index,
+        end_index: end_index,
+        sum_to: sum_to,
+        list_of_integers: list_of_integers
+      }) do
+    sum_to ==
+      list_of_integers
+      |> Enum.slice(start_index..end_index)
+      |> Enum.sum()
   end
 end

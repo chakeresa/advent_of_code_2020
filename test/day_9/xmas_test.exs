@@ -39,9 +39,8 @@ defmodule XMASTest do
       assert XMAS.part_2(@sample_input, 5) == 62
     end
 
-    @tag :skip
     test "works for the actual data" do
-      assert XMAS.part_2() == "TODO"
+      assert XMAS.part_2() == 4_389_369
     end
   end
 end
