@@ -59,4 +59,16 @@ defmodule JoltageAdapterTest do
       assert JoltageAdapter.part_1() == 1904
     end
   end
+
+  describe "part 2 - possible_arrangement_count" do
+    test "works for the sample data" do
+      assert JoltageAdapter.possible_arrangement_count(@sample_input_1) == 8
+      assert JoltageAdapter.possible_arrangement_count(@sample_input_2) == 19208
+    end
+
+    @tag :skip
+    test "works for the actual data" do
+      assert JoltageAdapter.possible_arrangement_count() == 1904
+    end
+  end
 end
