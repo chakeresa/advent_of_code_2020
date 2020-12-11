@@ -1,4 +1,4 @@
-defmodule Template do
+defmodule JoltageAdapter do
   @list_of_lines_from_txt FileImport.list_of_lines("lib/day_10/data.txt")
 
   @doc """
@@ -118,7 +118,19 @@ defmodule Template do
   differences multiplied by the number of 3-jolt differences?
   """
   def part_1(list_of_lines \\ @list_of_lines_from_txt) do
-    list_of_lines
+    orig_nums =
+      list_of_lines
+      |> Enum.map(&String.to_integer/1)
+      |> Enum.sort()
+
+    counts =
+      ([0 | orig_nums] ++ [List.last(orig_nums) + 3])
+      |> Enum.chunk_every(2, 1, :discard)
+      |> Enum.reduce(%{1 => 0, 2 => 0, 3 => 0}, fn [lo, hi], counter ->
+        Map.update!(counter, hi - lo, &(&1 + 1))
+      end)
+
+    Map.get(counts, 1) * Map.get(counts, 3)
   end
 
   @doc """
