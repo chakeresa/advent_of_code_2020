@@ -174,4 +174,42 @@ defmodule SeatTest do
              ]
     end
   end
+
+  describe "visible_neighbors" do
+    test "works for sample data" do
+      assert Seat.visible_neighbors(
+               [
+                 ".......#.",
+                 "...#.....",
+                 ".#.......",
+                 ".........",
+                 "..#L....#",
+                 "....#....",
+                 ".........",
+                 "#........",
+                 "...#....."
+               ],
+               4,
+               3
+             ) == ["#", "#", "#", "#", "#", "#", "#", "#"]
+
+      assert Seat.visible_neighbors(
+               [".............", ".L.L.#.#.#.#.", "............."],
+               1,
+               1
+             ) == ["L"]
+
+      assert Seat.visible_neighbors(
+               [".............", ".L.L.#.#.#.#.", "............."],
+               1,
+               3
+             ) == ["L", "#"]
+
+      assert Seat.visible_neighbors(
+               [".##.##.", "#.#.#.#", "##...##", "...L...", "##...##", "#.#.#.#", ".##.##."],
+               3,
+               3
+             ) == []
+    end
+  end
 end

@@ -387,13 +387,55 @@ defmodule Seat do
   end
 
   def visible_continue_until_equilibrium(list_of_lines) do
-    # TODO: new func instead of next_grid
-    next = next_grid(list_of_lines)
+    next = next_grid_part2(list_of_lines)
 
     if list_of_lines == next do
       list_of_lines
     else
       visible_continue_until_equilibrium(next)
     end
+  end
+
+  def visible_neighbors([_first_line | _] = _list_of_lines, _row_idx, _column_idx) do
+    # TODO:
+    # [top_left, above, top_right, left, right, bottom_left, below, bottom_right]
+    []
+  end
+
+  def num_visible_neighbors_occupied(list_of_lines, row_idx, column_idx) do
+    list_of_lines
+    |> visible_neighbors(row_idx, column_idx)
+    |> Enum.count(&(&1 == "#"))
+  end
+
+  def next_grid_part2(list_of_lines) do
+    list_of_lines
+    |> Enum.with_index()
+    |> Enum.map(fn {row, row_idx} ->
+      row
+      |> String.graphemes()
+      |> Enum.with_index()
+      |> Enum.map(fn {char, column_idx} ->
+        case char do
+          "L" ->
+            if num_visible_neighbors_occupied(list_of_lines, row_idx, column_idx) == 0 do
+              "#"
+            else
+              "L"
+            end
+
+          "#" ->
+            if num_visible_neighbors_occupied(list_of_lines, row_idx, column_idx) >= 5 do
+              "L"
+            else
+              "#"
+            end
+
+          "." ->
+            "."
+        end
+      end)
+      |> Enum.join()
+    end)
   end
 end
