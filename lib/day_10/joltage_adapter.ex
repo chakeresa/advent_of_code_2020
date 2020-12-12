@@ -202,6 +202,101 @@ defmodule JoltageAdapter do
   connect the charging outlet to your device?
   """
   def possible_arrangement_count(list_of_lines \\ @list_of_lines_from_txt) do
-    list_of_lines
+    # Attempt 1...
+    # orig_nums =
+    #   list_of_lines
+    #   |> Enum.map(&String.to_integer/1)
+    #   |> Enum.sort()
+
+    # all_nums =
+    #   ([0 | orig_nums] ++ [List.last(orig_nums) + 3])
+    #   |> Enum.reverse()
+
+    # main_product =
+    #   all_nums
+    #   |> Enum.chunk_every(4, 1, :discard)
+    #   |> IO.inspect(label: "chunked")
+    #   |> Enum.reduce(1, fn [hi | other_3], product ->
+    #     IO.inspect(hi, label: "hi")
+    #     IO.inspect(other_3, label: "other_3")
+    #     possible = Enum.count(other_3, &(&1 + 3 >= hi)) |> IO.inspect(label: "possible")
+    #     (product * possible) |> IO.inspect(label: "product")
+    #   end)
+
+    # [first, _second, last] = Enum.take(all_nums, -3)
+
+    # extra =
+    #   if last + 3 >= first do
+    #     3
+    #   else
+    #     2
+    #   end
+
+    # main_product * extra
+
+    # Attempt 2...
+    # orig_nums =
+    #   list_of_lines
+    #   |> Enum.map(&String.to_integer/1)
+    #   |> Enum.sort()
+
+    # exponent =
+    #   ([0 | orig_nums] ++ [List.last(orig_nums) + 3])
+    #   |> Enum.chunk_every(3, 1, :discard)
+    #   |> Enum.filter(fn [lo, _med, hi] ->
+    #     lo + 2 == hi
+    #   end)
+    #   |> Enum.count()
+    #   |> IO.inspect()
+
+    # :math.pow(2, exponent)
+
+    # Attempt 3
+    orig_nums =
+      list_of_lines
+      |> Enum.map(&String.to_integer/1)
+      |> Enum.sort()
+
+    all_nums = [0 | orig_nums] ++ [List.last(orig_nums) + 3]
+
+    main_counts =
+      all_nums
+      |> Enum.chunk_every(5, 1, :discard)
+      |> Enum.reduce(
+        %{middle_of_3: 0, middle_of_5: 0},
+        fn [lo, below, _middle, above, hi], accum ->
+          cond do
+            lo + 4 == hi ->
+              Map.update!(accum, :middle_of_5, &(&1 + 1))
+
+            below + 2 == above ->
+              Map.update!(accum, :middle_of_3, &(&1 + 1))
+
+            true ->
+              accum
+          end
+        end
+      )
+
+    full_counts =
+      all_nums
+      |> Enum.take(-4)
+      |> Enum.chunk_every(3, 1, :discard)
+      |> Enum.reduce(
+        main_counts,
+        fn [below, _middle, above], accum ->
+          cond do
+            below + 2 == above ->
+              Map.update!(accum, :middle_of_3, &(&1 + 1))
+
+            true ->
+              accum
+          end
+        end
+      )
+
+    :math.pow(2, Map.get(full_counts, :middle_of_3))
+    |> Kernel.*(:math.pow(1.75, Map.get(full_counts, :middle_of_5)))
+    |> floor()
   end
 end
