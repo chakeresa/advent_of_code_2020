@@ -211,9 +211,8 @@ defmodule JoltageAdapter do
 
     all_nums = [0 | orig_nums] ++ [List.last(orig_nums) + 3]
 
-    all_nums
-    |> Enum.with_index()
-    |> Enum.reduce(1, fn {_num, index}, product ->
+    0..(length(all_nums) - 1)
+    |> Enum.reduce(1, fn index, product ->
       cond do
         middle_of_5?(index, all_nums) -> 1.75 * product
         middle_of_3?(index, all_nums) -> 2 * product
