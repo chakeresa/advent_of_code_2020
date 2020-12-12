@@ -146,4 +146,32 @@ defmodule SeatTest do
              ]
     end
   end
+
+  describe "part 2 - visible_equilibrium_occupied_seats" do
+    test "works for the sample data" do
+      assert Seat.visible_equilibrium_occupied_seats(@sample_input) == 26
+    end
+
+    @tag :skip
+    test "works for the actual data" do
+      assert Seat.visible_equilibrium_occupied_seats() == "TODO"
+    end
+  end
+
+  describe "visible_continue_until_equilibrium" do
+    test "returns the equilibrium list of lines" do
+      assert Seat.visible_continue_until_equilibrium(@sample_input) == [
+               "#.L#.L#.L#",
+               "#LLLLLL.LL",
+               "L.L.L..#..",
+               "##L#.#L.L#",
+               "L.L#.LL.L#",
+               "#.LLLL#.LL",
+               "..#.L.....",
+               "LLL###LLL#",
+               "#.LLLLL#.L",
+               "#.L#LL#.L#"
+             ]
+    end
+  end
 end
